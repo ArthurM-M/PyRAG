@@ -30,7 +30,7 @@ class BM25:
         
         return idf
 
-    def _punctuate_document(self, tokenized_query, tokenized_doc, doc_len):
+    def _score_document(self, tokenized_query, tokenized_doc, doc_len):
         score = 0.0
         for word in tokenized_query:
             if word not in self.idf:
@@ -48,7 +48,7 @@ class BM25:
 
         scores = []
         for i, tokenized_doc in enumerate(self.tokenized_corpus):
-            score = self._punctuate_document(tokenized_query, tokenized_doc, self.docs_len[i])
+            score = self._score_document(tokenized_query, tokenized_doc, self.docs_len[i])
             scores.append(score)
         
         max_score = max(scores)
