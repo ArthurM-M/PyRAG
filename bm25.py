@@ -56,7 +56,9 @@ class BM25:
             scores.append(score)
         
         max_score = max(scores)
+        if max_score == 0:
+            return scores
+
         for i, score in enumerate(scores):
             scores[i] = score / max_score
-
         return scores
