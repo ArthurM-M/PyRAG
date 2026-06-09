@@ -14,7 +14,11 @@ class BM25:
         self.idf = self._calculate_idf()
 
     def _tokenize(self, text):
-        punctuation = [".", ",", "'", '"', "(", ")", "-", "!", "?", ";"]
+        punctuation = [
+            ".", ",", "'", '"', "(", ")", "-", "!", "?", ";",
+            ":", "...", "/", "\\", "[", "]", "{", "}", "<", ">", 
+            "—", "*", "$", "%", "@"
+        ]
         txt = text.lower()
         for char in punctuation:
             txt = txt.replace(char, "")
