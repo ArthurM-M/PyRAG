@@ -1,54 +1,54 @@
 import math
 
 class BM25:
-    def __init__(self, documentos, k1 = 1.5, b = 0.75):
-        self.documentos_originais = documentos
+    def __init__(self, documents, k1 = 1.5, b = 0.75):
+        self.original_documents = documents
         self.k1 = k1
         self.b = b
-        self.N = len(documentos)
+        self.N = len(documents)
 
-        self.corpus_tokenizado = [self._tokenizar(doc) for doc in documentos]
-        self.comprimentos_docs = [len(doc) for doc in self.corpus_tokenizado]
-        self.comprimento_medio = sum(self.comprimentos_docs) / self.N if self.N > 0 else 0
+        self.tokenized_corpus = [self._tokenize(doc) for doc in documents]
+        self.docs_len = [len(doc) for doc in self.tokenized_corpus]
+        self.md_len = sum(self.docs_len) / self.N if self.N > 0 else 0
 
-        self.idf = self._calcular_idf()
+        self.idf = self._calculate_idf()
 
-    def _tokenizar(self, texto):
-        pontuacao = [".", ",", "'", '"', "(", ")", "-", "!", "?", ";"]
-        txt = texto.lower()
-        for char in pontuacao:
+    def _tokenize(self, text):
+        punctuation = [".", ",", "'", '"', "(", ")", "-", "!", "?", ";"]
+        txt = text.lower()
+        for char in punctuation:
             txt = txt.replace(char, "")
         return txt.split()
     
-    def _calcular_idf(self):
-        todas_palavras = set(palavra for doc in self.corpus_tokenizado for palavra in doc)
+    def _calculate_idf(self):
+        words = set(word for doc in self.tokenized_corpus for word in doc)
         idf = {}
-        for palavra in todas_palavras:
-            doc_count = sum(1 for doc in self.corpus_tokenizado if palavra in doc)
+        for word in words:
+            doc_count = sum(1 for doc in self.tokenized_corpus if word in doc)
 
-            idf[palavra] = math.log((self.N - doc_count + 0.5) / (doc_count + 0.5) + 1)
+            idf[word] = math.log((self.N - doc_count + 0.5) / (doc_count + 0.5) + 1)
         
         return idf
 
-    def _pontuar_documento(self, query_tokenizada, doc_tokenizado, doc_len):
+    def _punctuate_document(self, tokenized_query, tokenized_doc, doc_len):
         score = 0.0
-        for palavra in query_tokenizada:
-            if palavra not in self.idf:
+        for word in tokenized_query:
+            if word not in self.idf:
                 continue
         
-            tf = doc_tokenizado.count(palavra)
-            numerador = tf * (self.k1 + 1)
-            denominador = tf + self.k1 * (1.0 - self.b + self.b * (doc_len / self.comprimento_medio))
+            tf = tokenized_doc.count(word)
+            numerator = tf * (self.k1 + 1)
+            denominator = tf + self.k1 * (1.0 - self.b + self.b * (doc_len / self.md_len))
             
-            score += self.idf[palavra] * (numerador / denominador)
+            score += self.idf[word] * (numerator / denominator)
         return score
     
-    def rank_bm25(self, pergunta):
-        query_tokenizada = self._tokenizar(pergunta)
+    def rank_bm25(self, question):
+        tokenized_query = self._tokenize(question)
 
         scores = []
-        for i, doc_tokenizado in enumerate(self.corpus_tokenizado):
-            score = self._pontuar_documento(query_tokenizada, doc_tokenizado, self.comprimentos_docs[i])
+        for i, tokenized_doc in enumerate(self.tokenized_corpus):
+            score = self._punctuate_document(tokenized_query, tokenized_doc, self.docs_len[i])
             scores.append(score)
         
         max_score = max(scores)

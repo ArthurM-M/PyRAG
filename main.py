@@ -6,7 +6,7 @@ import os
 
 load_dotenv()
 
-documentos = [
+documents = [
     "A política de reembolso da empresa garante devolução do dinheiro em até 7 dias úteis.",
     "O horário de atendimento do suporte técnico é de segunda a sexta, das 8h às 18h.",
     "Para resetar sua senha, clique em 'Esqueci minha senha' na tela de login e siga as instruções.",
@@ -15,8 +15,8 @@ documentos = [
 
 client = genai.Client(api_key=os.getenv("API_KEY"))
 
-searcher_bm25 = BM25(documentos)
-searcher_emb = VEC_EMB(client, documentos)
+searcher_bm25 = BM25(documents)
+searcher_emb = VEC_EMB(client, documents)
 
 while True:
     question = input("Você: ").strip()
@@ -29,11 +29,11 @@ while True:
     c_emb = searcher_emb.rank_vec_emb(question)
 
     c_final = []
-    for i in range(len(documentos)):
-        c_final.append((c_bm25[i] + c_emb[i], documentos[i]))
+    for i in range(len(documents)):
+        c_final.append((c_bm25[i] + c_emb[i], documents[i]))
 
     c_final.sort(key=lambda x: x[0], reverse=True)
-    contexto = "\n".join(
+    context = "\n".join(
         doc for _, doc in c_final[:3]
     )
 
@@ -42,7 +42,7 @@ while True:
     Se o contexto não for útil, responda "Não tenho dados suficientes para responder corretamente.".
 
     Contexto:
-    {contexto}
+    {context}
 
     Pergunta:
     {question}
