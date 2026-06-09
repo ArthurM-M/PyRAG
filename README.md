@@ -1,6 +1,6 @@
 # PyRag
 
-A Python implementation of a RAG system. This project integrates the Google Gemini API with a BM25 search engine developed from scratch.
+A Python implementation of a RAG system. This project integrates the Google Gemini API with a hybrid retrieval via BM25 and vector embedding.
 
 ## What's RAG?
 
@@ -30,7 +30,7 @@ For example:
 
 ## What's BM25?
 
-BM25 (Best Matching 25) is a ranking algorithm widely used in information retrieval systems and search engines.
+BM25 (Best Matching 25) is a ranking algorithm used in information retrieval systems and search engines.
 
 It scores documents based on:
 * The **frequency** of query terms within a document.
@@ -38,3 +38,14 @@ It scores documents based on:
 * The **length** of the document.
 
 BM25 relies on exact term matching. This makes it effective when the query contains important keywords that must be present in the retrieved documents.
+
+## What's vector embedding?
+
+While BM25 looks for exact words, Vector Embeddings allow the system to understand the meaning behind those words. An embedding is a mathematical representation of text converted into a long string of numbers (a vector) by a machine learning model.
+
+Words or sentences with similar meanings are placed close to each other in a mathematical space. For example, the vectors for "king" and "queen", or "Python" and "programming", will be tightly clustered. This allows the RAG system to find relevant documents even if the user uses completely different words than the source text (e.g., searching for "feline illnesses" and retrieving a document about "sick cats").
+
+## Why use hybrid retrieval?
+
+By merging keyword precision with semantic depth, hybrid retrieval ensures the LLM receives the most accurate context possible.
+
