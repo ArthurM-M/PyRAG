@@ -28,9 +28,6 @@ while True:
     c_bm25 = searcher_bm25.rank_bm25(question)
     c_emb = searcher_emb.rank_vec_emb(question)
 
-    print(c_bm25)
-    print(c_emb)
-
     c_final = []
     for i in range(len(documentos)):
         c_final.append((c_bm25[i] + c_emb[i], documentos[i]))
@@ -50,8 +47,6 @@ while True:
     Pergunta:
     {question}
     """
-
-    print(f"Prompt com contexto: {prompt_contexto}")
 
     response = client.models.generate_content(
         model= "gemini-3.1-flash-lite",
