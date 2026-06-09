@@ -1,0 +1,3 @@
+Para resetar sua senha, clique em “Esqueci minha senha” na tela de login e siga as instruções.
+O sistema exige autenticação em dois fatores para maior proteção dos dados.
+Todas as transações são criptografadas com protocolo SSL.

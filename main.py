@@ -1,17 +1,17 @@
 from google import genai
 from dotenv import load_dotenv
+from pathlib import Path
 from bm25 import BM25
 from vec_emb import VEC_EMB
 import os
 
 load_dotenv()
 
-documents = [
-    "A política de reembolso da empresa garante devolução do dinheiro em até 7 dias úteis.",
-    "O horário de atendimento do suporte técnico é de segunda a sexta, das 8h às 18h.",
-    "Para resetar sua senha, clique em 'Esqueci minha senha' na tela de login e siga as instruções.",
-    "A garantia dos produtos eletrônicos é de 1 ano contra defeitos de fabricação."
-]
+documents = []
+
+for arq in Path("docs").glob("*.txt"):
+    with open(arq, "r", encoding="utf-8") as f:
+        documents.append(f.read())
 
 client = genai.Client(api_key=os.getenv("API_KEY"))
 
