@@ -43,16 +43,12 @@ class BM25:
             score += self.idf[palavra] * (numerador / denominador)
         return score
     
-    def buscar_melhor_contexto(self, pergunta):
+    def rank_bm25(self, pergunta):
         query_tokenizada = self._tokenizar(pergunta)
-        scores = []
 
+        scores = []
         for i, doc_tokenizado in enumerate(self.corpus_tokenizado):
             score = self._pontuar_documento(query_tokenizada, doc_tokenizado, self.comprimentos_docs[i])
-            scores.append((score, self.documentos_originais[i]))
+            scores.append(score)
 
-        scores.sort(key=lambda x: x[0], reverse=True)
-
-        if scores and scores[0][0] > 0:
-            return scores[0][1]
-        return "Nenhum contexto encontrado."
+        return scores
