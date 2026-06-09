@@ -11,7 +11,10 @@ documents = []
 
 for arq in Path("docs").glob("*.txt"):
     with open(arq, "r", encoding="utf-8") as f:
-        documents.append(f.read())
+        for linha in f:
+            linha = linha.strip()
+            if linha:
+                documents.append(linha)
 
 client = genai.Client(api_key=os.getenv("API_KEY"))
 
@@ -34,7 +37,7 @@ while True:
 
     c_final.sort(key=lambda x: x[0], reverse=True)
     context = "\n".join(
-        doc for _, doc in c_final[:3]
+        doc for _, doc in c_final[:2]
     )
 
     prompt_contexto = f"""
