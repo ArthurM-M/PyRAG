@@ -50,5 +50,9 @@ class BM25:
         for i, doc_tokenizado in enumerate(self.corpus_tokenizado):
             score = self._pontuar_documento(query_tokenizada, doc_tokenizado, self.comprimentos_docs[i])
             scores.append(score)
+        
+        max_score = max(scores)
+        for i, score in enumerate(scores):
+            scores[i] = score / max_score
 
         return scores
