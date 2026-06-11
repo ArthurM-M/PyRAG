@@ -3,6 +3,12 @@ import numpy as np
 
 
 class VEC_EMB:
+    """
+    Document ranking based on vector embeddings.
+
+    Uses the Gemini Embedding model.
+    """
+
     def __init__(self, client, documents):
         self.client = client
         self.documents = documents
@@ -18,6 +24,11 @@ class VEC_EMB:
         return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
     def rank_vec_emb(self, question):
+        """
+        Rank all documents against a query using vector embeddings.
+
+        Returns similarity scores in the range [0, 1].
+        """
         emb = self.client.models.embed_content(
             model="gemini-embedding-001", contents=question
         )

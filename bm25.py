@@ -2,6 +2,12 @@ import math
 
 
 class BM25:
+    """
+    BM25 implementation for document ranking.
+
+    Implemented without external libraries.
+    """
+
     def __init__(self, documents, k1=1.5, b=0.75):
         self.original_documents = documents
         self.k1 = k1
@@ -73,6 +79,11 @@ class BM25:
         return score
 
     def rank_bm25(self, question):
+        """
+        Rank all documents against a query using BM25.
+
+        Returns normalized scores in the range [0, 1].
+        """
         tokenized_query = self._tokenize(question)
 
         scores = []
