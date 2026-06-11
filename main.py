@@ -35,9 +35,17 @@ def retrieve_context(question, documents, searcher_bm25, searcher_emb):
 
     final_scores = []
     for i in range(len(documents)):
-        final_scores.append((bm25_scores[i] + embedding_scores[i], documents[i]))
+        final_scores.append(
+            (
+                0.5 * bm25_scores[i] + 0.5 * embedding_scores[i],
+                documents[i],
+            )  # Could change individual weights here
+        )
 
     final_scores.sort(key=lambda x: x[0], reverse=True)
+
+    if final_scores[0][0] < 0.6:
+        return None
 
     context = "\n".join(doc for _, doc in final_scores[:2])
 
@@ -54,7 +62,6 @@ def generate_answer(client, config, question, context):
     2. Não utilize nenhum conhecimento prévio ou externo ao texto fornecido.
     3. Se o contexto não contiver a resposta exata ou não for útil, responda rigorosamente com a frase: "Não tenho dados suficientes para responder corretamente." e nada mais.
     4. Seja direto, objetivo e evite suposições.
-    5. Quando o usuário fizer uma saudação ou despedida, responda devidamente.
 
     ### Contexto:
     {context}
@@ -81,9 +88,11 @@ def chat(client, config, documents, searcher_bm25, searcher_emb):
 
         context = retrieve_context(question, documents, searcher_bm25, searcher_emb)
 
-        response = generate_answer(client, config, question, context)
-
-        print(f"Chat: {response}")
+        if context is None:
+            print("Não tenho dados suficientes para responder corretamente")
+        else:
+            response = generate_answer(client, config, question, context)
+            print(f"Chat: {response}")
 
 
 def main():
