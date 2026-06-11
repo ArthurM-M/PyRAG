@@ -49,8 +49,7 @@ def generate_answer(client, question, context):
     """
 
     response = client.models.generate_content(
-        model= "gemini-3.1-flash-lite",
-        contents= prompt_contexto
+        model="gemini-3.1-flash-lite", contents=prompt_contexto
     )
 
     return response.text
@@ -63,14 +62,14 @@ def chat(client, documents, searcher_bm25, searcher_emb):
         if not question:
             print("Digite uma pergunta.")
             continue
-        
+
         context = retrieve_context(question, documents, searcher_bm25, searcher_emb)
 
         response = generate_answer(client, question, context)
-    
+
         print(f"Chat: {response}")
 
-    
+
 def main():
     load_dotenv()
 
