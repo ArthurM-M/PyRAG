@@ -45,19 +45,25 @@ def retrieve_context(question, documents, searcher_bm25, searcher_emb):
 
 def generate_answer(client, question, context):
     """Send a prompt to Gemini and generate an answer."""
-    prompt_contexto = f"""
-    Você é um assistente virtual. Use o Contexto para responder à Pergunta.
-    Se o contexto não for útil, responda "Não tenho dados suficientes para responder corretamente.".
+    prompt_context = f"""
+    Você é um assistente virtual especialista e factual. Seu objetivo é responder à Pergunta do usuário baseando-se estritamente no Contexto fornecido.
 
-    Contexto:
+    Diretrizes estritas:
+    1. Baseie sua resposta APENAS nas informações contidas no "Contexto" abaixo.
+    2. Não utilize nenhum conhecimento prévio ou externo ao texto fornecido.
+    3. Se o contexto não contiver a resposta exata ou não for útil, responda rigorosamente com a frase: "Não tenho dados suficientes para responder corretamente." e nada mais.
+    4. Seja direto, objetivo e evite suposições.
+    5. Quando o usuário fizer uma saudação ou despedida, responda devidamente.
+
+    ### Contexto:
     {context}
 
-    Pergunta:
+    ### Pergunta:
     {question}
     """
 
     response = client.models.generate_content(
-        model="gemini-3.1-flash-lite", contents=prompt_contexto
+        model="gemini-3.1-flash-lite", contents=prompt_context
     )
 
     return response.text
