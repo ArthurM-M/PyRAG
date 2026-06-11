@@ -1,4 +1,5 @@
 import math
+import re
 
 
 class BM25:
@@ -21,37 +22,9 @@ class BM25:
         self.idf = self._calculate_idf()
 
     def _tokenize(self, text):
-        punctuation = [
-            ".",
-            ",",
-            "'",
-            '"',
-            "(",
-            ")",
-            "-",
-            "!",
-            "?",
-            ";",
-            ":",
-            "...",
-            "/",
-            "\\",
-            "[",
-            "]",
-            "{",
-            "}",
-            "<",
-            ">",
-            "—",
-            "*",
-            "$",
-            "%",
-            "@",
-        ]
-        txt = text.lower()
-        for char in punctuation:
-            txt = txt.replace(char, "")
-        return txt.split()
+        text = text.lower()
+        text = re.sub(r"[^\w\s]", " ", text)
+        return text.split()
 
     def _calculate_idf(self):
         words = set(word for doc in self.tokenized_corpus for word in doc)
