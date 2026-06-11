@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 from bm25 import BM25
@@ -43,7 +44,7 @@ def retrieve_context(question, documents, searcher_bm25, searcher_emb):
     return context
 
 
-def generate_answer(client, question, context):
+def generate_answer(client, config, question, context):
     """Send a prompt to Gemini and generate an answer."""
     prompt_context = f"""
     Você é um assistente virtual especialista e factual. Seu objetivo é responder à Pergunta do usuário baseando-se estritamente no Contexto fornecido.
@@ -63,13 +64,13 @@ def generate_answer(client, question, context):
     """
 
     response = client.models.generate_content(
-        model="gemini-3.1-flash-lite", contents=prompt_context
+        model="gemini-3.1-flash-lite", contents=prompt_context, config=config
     )
 
     return response.text
 
 
-def chat(client, documents, searcher_bm25, searcher_emb):
+def chat(client, config, documents, searcher_bm25, searcher_emb):
     """Run the interactive chat loop."""
     while True:
         question = input("Você: ").strip()
@@ -80,7 +81,7 @@ def chat(client, documents, searcher_bm25, searcher_emb):
 
         context = retrieve_context(question, documents, searcher_bm25, searcher_emb)
 
-        response = generate_answer(client, question, context)
+        response = generate_answer(client, config, question, context)
 
         print(f"Chat: {response}")
 
@@ -93,10 +94,12 @@ def main():
 
     client = genai.Client(api_key=os.getenv("API_KEY"))
 
+    config = types.GenerateContentConfig(temperature=0.2, top_p=0.9, top_k=40)
+
     searcher_bm25 = BM25(documents)
     searcher_emb = VEC_EMB(client, documents)
 
-    chat(client, documents, searcher_bm25, searcher_emb)
+    chat(client, config, documents, searcher_bm25, searcher_emb)
 
 
 if __name__ == "__main__":
