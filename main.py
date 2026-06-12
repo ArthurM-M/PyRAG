@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 
 from google import genai
@@ -13,8 +14,8 @@ def load_documents():
     """Load non-empty lines from text files in the docs directory."""
     documents = []
 
-    for arq in Path("docs").glob("*.txt"):
-        with open(arq, "r", encoding="utf-8") as f:
+    for file in Path("docs").glob("*.txt"):
+        with open(file, "r", encoding="utf-8") as f:
             for linha in f:
                 linha = linha.strip()
                 if linha:
