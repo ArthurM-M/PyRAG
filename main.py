@@ -78,6 +78,35 @@ def generate_answer(client, config, question, context):
     return response.text
 
 
+def rewrite_query(client, question):
+    """Use Gemini to rewrite the question"""
+    prompt = f"""
+    Você é um especialista em recuperação de informação (Information Retrieval).
+
+    Sua tarefa é corrigir erros na pergunta para encontrar documentos relevantes.
+
+    Regras:
+
+    1. Preserve a intenção original da pergunta.
+    2. Corrija erros de ortografia e digitação.
+    4. Substitua expressões longas por termos mais diretos quando possível.
+    6. NÃO responda à pergunta.
+    7. NÃO explique seu raciocínio.
+
+    ### Pergunta:
+
+    {question}
+
+    """
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite", contents=prompt
+    )
+
+    print(response.text)
+
+    return response.text
+
+
 def chat(client, config, documents, searcher_bm25, searcher_emb):
     """Run the interactive chat loop."""
     while True:
@@ -87,12 +116,14 @@ def chat(client, config, documents, searcher_bm25, searcher_emb):
             print("Digite uma pergunta.")
             continue
 
-        context = retrieve_context(question, documents, searcher_bm25, searcher_emb)
+        search_query = rewrite_query(client, question)
+
+        context = retrieve_context(search_query, documents, searcher_bm25, searcher_emb)
 
         if context is None:
             print("Não tenho dados suficientes para responder corretamente")
         else:
-            response = generate_answer(client, config, question, context)
+            response = generate_answer(client, config, search_query, context)
             print(f"Chat: {response}")
 
 
@@ -103,7 +134,6 @@ def main():
     documents = load_documents()
 
     client = genai.Client(api_key=os.getenv("API_KEY"))
-
     config = types.GenerateContentConfig(temperature=0.2, top_p=0.9, top_k=40)
 
     searcher_bm25 = BM25(documents)
