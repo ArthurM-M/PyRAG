@@ -9,6 +9,26 @@ from dotenv import load_dotenv
 from bm25 import BM25
 from vec_emb import VEC_EMB
 
+HISTORY_FILE = "history.json"
+
+
+def load_history():
+    """Load conversation memory from HISTORY_FILE"""
+    file = Path(HISTORY_FILE)
+    if file.exists():
+        with open(file, "r", encoding="utf-8") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return []
+    return []
+
+
+def save_history(history):
+    """Save conversation history on HISTORY_FILE"""
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=4)
+
 
 def load_documents():
     """Load non-empty lines from text files in the docs directory."""
@@ -48,9 +68,39 @@ def retrieve_context(question, documents, searcher_bm25, searcher_emb):
     if final_scores[0][0] < 0.6:
         return None
 
-    context = "\n".join(doc for _, doc in final_scores[:2])
+    context = "\n".join(doc for _, doc in final_scores[:3])
 
     return context
+
+
+def rewrite_query(client, question, history):
+    """Use Gemini to rewrite the question"""
+    prompt = f"""
+    Você é um especialista em recuperação de informação (Information Retrieval).
+
+    Você tem duas tarefas:
+    1. Corrigir erros gramaticais na Pergunta para encontrar documentos relevantes.
+    2. Caso a Pergunta dependa do histórico para fazer sentido, reescrevê-la de modo que ela contenha toda a informação.
+
+    Regras:
+    1. Preserve a intenção original da pergunta.
+    2. Corrija erros de ortografia e digitação.
+    4. Substitua expressões longas por termos mais diretos quando possível.
+    6. NÃO responda à pergunta.
+    7. NÃO explique seu raciocínio.
+
+    ### Pergunta:
+    {question}
+
+    ### Histórico
+    {history}
+
+    """
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite", contents=prompt
+    )
+
+    return response.text
 
 
 def generate_answer(client, config, question, context):
@@ -78,37 +128,10 @@ def generate_answer(client, config, question, context):
     return response.text
 
 
-def rewrite_query(client, question):
-    """Use Gemini to rewrite the question"""
-    prompt = f"""
-    Você é um especialista em recuperação de informação (Information Retrieval).
-
-    Sua tarefa é corrigir erros na pergunta para encontrar documentos relevantes.
-
-    Regras:
-
-    1. Preserve a intenção original da pergunta.
-    2. Corrija erros de ortografia e digitação.
-    4. Substitua expressões longas por termos mais diretos quando possível.
-    6. NÃO responda à pergunta.
-    7. NÃO explique seu raciocínio.
-
-    ### Pergunta:
-
-    {question}
-
-    """
-    response = client.models.generate_content(
-        model="gemini-3.1-flash-lite", contents=prompt
-    )
-
-    print(response.text)
-
-    return response.text
-
-
 def chat(client, config, documents, searcher_bm25, searcher_emb):
     """Run the interactive chat loop."""
+    history = load_history()
+
     while True:
         question = input("Você: ").strip()
 
@@ -116,7 +139,7 @@ def chat(client, config, documents, searcher_bm25, searcher_emb):
             print("Digite uma pergunta.")
             continue
 
-        search_query = rewrite_query(client, question)
+        search_query = rewrite_query(client, question, history)
 
         context = retrieve_context(search_query, documents, searcher_bm25, searcher_emb)
 
@@ -125,6 +148,9 @@ def chat(client, config, documents, searcher_bm25, searcher_emb):
         else:
             response = generate_answer(client, config, search_query, context)
             print(f"Chat: {response}")
+
+        history.append({"user": question, "bot": response})
+        save_history(history)
 
 
 def main():
