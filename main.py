@@ -136,8 +136,12 @@ def chat(client, config, documents, searcher_bm25, searcher_emb):
         question = input("Você: ").strip()
 
         if not question:
-            print("Digite uma pergunta.")
+            print("Chat: Digite uma pergunta.")
             continue
+
+        if question == "EXIT":
+            print("Chat: Até!")
+            break
 
         search_query = rewrite_query(client, question, history)
 
